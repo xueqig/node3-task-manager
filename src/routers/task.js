@@ -20,14 +20,41 @@ router.post('/tasks', auth, async (req, res) => {
 });
 
 // Read tasks
+// GET /tasks?completed=false
+// GET /tasks?limit=2&skip=2
+// GET /tasks?sortBy=createdAt:desc
 router.get('/tasks', auth, async (req, res) => {
+  const match = {};
+  const sort = {};
+
+  if (req.query.completed) {
+    match.completed = req.query.completed === 'true';
+  }
+
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split(':');
+    // 1: sort as ascending order, -1: sort as descending order
+    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+  }
+
   try {
-    // User can only read tasks created by himself
-    const tasks = await Task.find({ owner: req.user._id });
-    res.send(tasks);
+    // Will only return tasks that are created by the user and match certain criteria
+    await req.user
+      .populate({
+        path: 'tasks',
+        match,
+        options: {
+          limit: parseInt(req.query.limit), // limits the number of tasks returned
+          skip: parseInt(req.query.skip), // skips the first n number of tasks
+          sort,
+        },
+      })
+      .execPopulate();
+    res.send(req.user.tasks);
+
     // // Alternative solution
-    // await req.user.populate('tasks').execPopulate();
-    // res.send(req.user.tasks);
+    // const tasks = await Task.find({ owner: req.user._id });
+    // res.send(tasks);
   } catch (e) {
     res.status(500).send();
   }
