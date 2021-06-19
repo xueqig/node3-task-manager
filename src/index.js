@@ -6,7 +6,7 @@ const taskRouter = require('./routers/task');
 
 const app = express();
 // If no port, use 3000
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // // This middleware can be used when you need to temporarily shut down your server, e.g. when update your database
 // app.use((req, res, next) => {

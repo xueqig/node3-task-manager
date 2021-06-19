@@ -89,7 +89,7 @@ userSchema.methods.generateAuthToken = async function () {
   // First argument is what needs to be included in jwt
   // Second argument is secrete signing key used to issue and validate jwt
   // Third argument can be a set of options, can include expire in
-  const token = jwt.sign({ _id: user._id.toString() }, 'northremembers');
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
 
   // Save jwt to database
   user.tokens = user.tokens.concat({ token });
